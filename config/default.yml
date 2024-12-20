@@ -12,7 +12,7 @@ db:
 
 jwt:
   # expiresIn: 10
-  expiresIn: 900
+  expiresIn: 86400
   refreshExpiresIn: 604800
   cookieExpiresIn: 604800
 
@@ -22,7 +22,7 @@ app:
   version: 'v0.1'
   description: 'Official Truthy API'
   appUrl: 'http://localhost:7777'
-  frontendUrl: 'http://localhost:3000'
+  frontendUrl: 'http://localhost:8002/'
   sameSite: true
 
 mail:
@@ -64,4 +64,7 @@ winston:
   awsAccessKeyId: ''
   awsSecretAccessKey: ''
   awsRegion: ''
+
+audit:
+  queueName: 'truthy-audit'
   

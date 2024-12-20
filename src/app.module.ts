@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, RequestMethod } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { APP_FILTER, APP_GUARD, APP_PIPE } from '@nestjs/core';
@@ -29,12 +29,36 @@ import { TwofaModule } from 'src/twofa/twofa.module';
 import { CustomThrottlerGuard } from 'src/common/guard/custom-throttle.guard';
 import { DashboardModule } from 'src/dashboard/dashboard.module';
 import { AppController } from 'src/app.controller';
+import { TechnicianTeamsModule } from './technician-teams/technician-teams.module';
+import { OrdersModule } from './orders/orders.module';
+import { AuditLogModule } from './audit/auditLog.module';
 import winstonConfig from 'src/config/winston';
+import { AuditLogMiddleware } from './audit/audit-log.middleware';
+import { BullModule } from '@nestjs/bull';
+import { ServicesModule } from './services/services.module';
 
 const appConfig = config.get('app');
+const queueConfig = config.get('queue');
 
 @Module({
   imports: [
+    // The module that injects the queue needs to import the queue registration. don't put the queue regsitration in the audit module because it is not used there (check the mail module, contrast case)
+    // https://stackoverflow.com/questions/66494091/cant-resolve-dependency-when-try-to-inject-a-bull-queue-in-nestjs
+    BullModule.registerQueue({
+      name: config.get('audit.queueName'),
+    }),
+    BullModule.forRootAsync({
+      useFactory: () => ({
+        redis: {
+          host: process.env.REDIS_HOST || queueConfig.host,
+          port: process.env.REDIS_PORT || queueConfig.port,
+          password: process.env.REDIS_PASSWORD || queueConfig.password,
+          retryStrategy(times) {
+            return Math.min(times * 50, 2000);
+          }
+        }
+      })
+    }),
     WinstonModule.forRoot(winstonConfig),
     ThrottlerModule.forRootAsync({
       useFactory: () => throttleConfig
@@ -71,7 +95,11 @@ const appConfig = config.get('app');
     EmailTemplateModule,
     RefreshTokenModule,
     TwofaModule,
-    DashboardModule
+    DashboardModule,
+    TechnicianTeamsModule,
+    OrdersModule,
+    AuditLogModule,
+    ServicesModule
   ],
   providers: [
     {
@@ -82,11 +110,18 @@ const appConfig = config.get('app');
       provide: APP_GUARD,
       useClass: CustomThrottlerGuard
     },
-    {
-      provide: APP_FILTER,
-      useClass: I18nExceptionFilterPipe
-    }
+    // {
+    //   provide: APP_FILTER,
+    //   useClass: I18nExceptionFilterPipe
+    // }
   ],
   controllers: [AppController]
 })
-export class AppModule {}
+export class AppModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer
+      .apply(AuditLogMiddleware)
+      .exclude({ path: '*', method: RequestMethod.GET }) // Exclude GET requests
+      .forRoutes('*'); // Apply to all other routes
+  }
+}

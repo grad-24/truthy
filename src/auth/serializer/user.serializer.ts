@@ -33,7 +33,7 @@ export class UserSerializer extends ModelSerializer {
 
   @ApiProperty()
   @Transform(({ value }) => (value !== 'null' ? value : ''))
-  address: string;
+  address?: string;
 
   @ApiProperty()
   @Expose({
@@ -43,11 +43,11 @@ export class UserSerializer extends ModelSerializer {
 
   @ApiProperty()
   @Transform(({ value }) => (value !== 'null' ? value : ''))
-  contact: string;
+  contact?: string;
 
   @ApiProperty()
   @Transform(({ value }) => (value !== 'null' ? value : ''))
-  avatar: string;
+  avatar?: string;
 
   @ApiPropertyOptional()
   @Expose({

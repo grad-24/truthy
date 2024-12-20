@@ -1,4 +1,4 @@
-import { IsIn, IsNumber } from 'class-validator';
+import { ArrayNotEmpty, IsArray, IsBoolean, IsIn, IsNumber, IsOptional, IsString } from 'class-validator';
 import { OmitType } from '@nestjs/swagger';
 
 import { UserStatusEnum } from 'src/auth/user-status.enum';
@@ -20,7 +20,27 @@ export class CreateUserDto extends OmitType(RegisterUserDto, [
     message: `isIn-{"items":"${statusEnumArray.join(',')}"}`
   })
   status: UserStatusEnum;
+}
 
+export class CreateAdminDto extends CreateUserDto {
+
+}
+
+export class CreateCustomerDto extends CreateUserDto {
+
+}
+
+export class CreateTechnicianDto extends CreateUserDto {
+  @IsOptional()
   @IsNumber()
-  roleId: number;
+  teamId: number;
+
+  @IsOptional()
+  @IsBoolean()
+  isTeamLeader?: boolean;
+
+  @IsArray()
+  @ArrayNotEmpty()
+  @IsString({ each: true })
+  specialities: string[];
 }

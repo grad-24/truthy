@@ -6,7 +6,9 @@ import { CustomBaseEntity } from 'src/common/entity/custom-base.entity';
   name: 'email_templates'
 })
 export class EmailTemplateEntity extends CustomBaseEntity {
-  @Column()
+  @Column({
+    type: "text"
+  })
   @Index({
     unique: true
   })
@@ -21,9 +23,11 @@ export class EmailTemplateEntity extends CustomBaseEntity {
   @Column()
   subject: string;
 
-  @Column()
+  @Column({
+    type: "text"
+  })
   body: string;
 
-  @Column()
+  @Column({ nullable: true })
   isDefault: boolean;
 }

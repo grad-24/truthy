@@ -71,4 +71,11 @@ const LoginThrottleFactory = {
     JwtModule
   ]
 })
-export class AuthModule {}
+export class AuthModule { }
+
+// Benefits of Exporting PassportModule, JwtModule and others ->
+// - Centralized Configuration: By exporting these modules and services, you ensure that all configurations (like JWT secret and expiration) are managed in one place (AuthModule). This reduces the risk of inconsistencies and configuration errors.
+
+// - Reusability: Other modules can reuse the authentication logic and strategies provided by AuthModule without duplicating the import statements and configurations. This promotes DRY (Don't Repeat Yourself) principles.
+
+// - Simplicity: Importing AuthModule in other modules provides a simpler and cleaner way to manage dependencies. Other modules don't need to worry about the specifics of how Passport or JWT is configured; they can just rely on AuthModule to handle it.

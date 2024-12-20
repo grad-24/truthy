@@ -4,19 +4,32 @@ interface PermissionConfigInterface {
   modules: Array<ModulesPayloadInterface>;
 }
 
+export interface ModulesPayloadInterface {
+  name: string;
+  resource: string;
+  route?: string;
+  permissions?: Array<PermissionPayload>;
+  hasSubmodules: boolean;
+  submodules?: Array<SubModulePayloadInterface>;
+}
+
+export interface SubModulePayloadInterface {
+  name: string;
+  resource?: string;
+  route?: string;
+  permissions?: Array<PermissionPayload>;
+}
+
 interface rolePayload {
   id: number;
   name: string;
   description: string;
 }
 
-export enum MethodList {
-  GET = 'get',
-  POST = 'post',
-  PUT = 'put',
-  DELETE = 'delete',
-  ANY = 'any',
-  OPTIONS = 'options'
+export interface PermissionPayload {
+  name: string;
+  resource?: string;
+  route: Array<RoutePayloadInterface>;
 }
 
 export interface RoutePayloadInterface {
@@ -27,26 +40,14 @@ export interface RoutePayloadInterface {
   isDefault?: boolean;
 }
 
-export interface ModulesPayloadInterface {
-  name: string;
-  resource: string;
-  hasSubmodules: boolean;
-  route?: string;
-  submodules?: Array<SubModulePayloadInterface>;
-  permissions?: Array<PermissionPayload>;
-}
-
-export interface SubModulePayloadInterface {
-  name: string;
-  resource?: string;
-  route?: string;
-  permissions?: Array<PermissionPayload>;
-}
-
-export interface PermissionPayload {
-  name: string;
-  resource?: string;
-  route: Array<RoutePayloadInterface>;
+export enum MethodList {
+  GET = 'get',
+  POST = 'post',
+  PUT = 'put',
+  PATCH = 'patch',
+  DELETE = 'delete',
+  ANY = 'any',
+  OPTIONS = 'options'
 }
 
 export const PermissionConfiguration: PermissionConfigInterface = {
@@ -58,10 +59,21 @@ export const PermissionConfiguration: PermissionConfigInterface = {
     },
     {
       id: 2,
-      name: 'normal',
+      name: 'customer',
       description: 'normal user of the system'
+    },
+    {
+      id: 3,
+      name: 'technician',
+      description: 'technician registered in the system'
+    },
+    {
+      id: 4,
+      name: 'technician team leader',
+      description: 'leader of a technician team'
     }
   ],
+  // those routes won't require a specific permission
   defaultRoutes: [
     {
       path: '/check',
@@ -139,11 +151,38 @@ export const PermissionConfiguration: PermissionConfigInterface = {
             }
           ]
         },
+        // {
+        //   name: 'Store new user',
+        //   route: [
+        //     {
+        //       path: '/users',
+        //       method: MethodList.POST
+        //     }
+        //   ]
+        // },
         {
-          name: 'Store new user',
+          name: 'Store new admin',
           route: [
             {
-              path: '/users',
+              path: '/create-admin',
+              method: MethodList.POST
+            }
+          ]
+        },
+        {
+          name: 'Store new technician',
+          route: [
+            {
+              path: '/create-technician',
+              method: MethodList.POST
+            }
+          ]
+        },
+        {
+          name: 'Store new customer',
+          route: [
+            {
+              path: '/create-customer',
               method: MethodList.POST
             }
           ]
@@ -327,6 +366,137 @@ export const PermissionConfiguration: PermissionConfigInterface = {
           route: [
             {
               path: '/email-templates/:id',
+              method: MethodList.DELETE
+            }
+          ]
+        }
+      ]
+    },
+    {
+      name: 'Order management',
+      resource: 'order',
+      hasSubmodules: false,
+      permissions: [
+        {
+          name: 'View all orders',
+          route: [
+            {
+              path: '/orders',
+              method: MethodList.GET
+            }
+          ]
+        },
+        {
+          name: 'View order by id',
+          route: [
+            {
+              path: '/orders/:id',
+              method: MethodList.GET
+            }
+          ]
+        },
+        {
+          name: 'Store new order',
+          route: [
+            {
+              path: '/orders',
+              method: MethodList.POST
+            }
+          ]
+        },
+        {
+          name: 'Update order by id',
+          route: [
+            {
+              path: '/orders/:id',
+              method: MethodList.PATCH
+            }
+          ]
+        },
+        {
+          name: 'Mark order as In-Progress',
+          route: [
+            {
+              path: '/orders/:id/status/in-progress',
+              method: MethodList.PATCH
+            }
+          ]
+        },
+        {
+          name: 'Mark order as Done',
+          route: [
+            {
+              path: '/orders/:id/status/done',
+              method: MethodList.PATCH
+            }
+          ]
+        },
+        {
+          name: 'Delete order by id',
+          route: [
+            {
+              path: '/orders/:id',
+              method: MethodList.DELETE
+            }
+          ]
+        }
+      ]
+    },
+    {
+      name: 'Technician Team management',
+      resource: 'technicianTeam',
+      hasSubmodules: false,
+      permissions: [
+        {
+          name: 'View all technician Teams',
+          route: [
+            {
+              path: '/technician-teams',
+              method: MethodList.GET
+            }
+          ]
+        },
+        {
+          name: 'View available teams and times',
+          route: [
+            {
+              path: '/technician-teams/available-teams',
+              method: MethodList.GET
+            }
+          ]
+        },
+        {
+          name: 'View technician team by id',
+          route: [
+            {
+              path: '/technician-teams/:id',
+              method: MethodList.GET
+            }
+          ]
+        },
+        {
+          name: 'Store new technician team',
+          route: [
+            {
+              path: '/technician-teams',
+              method: MethodList.POST
+            }
+          ]
+        },
+        {
+          name: 'Update technician team by id',
+          route: [
+            {
+              path: '/technician-teams/:id',
+              method: MethodList.PATCH
+            }
+          ]
+        },
+        {
+          name: 'Delete technician team by id',
+          route: [
+            {
+              path: '/technician-teams/:id',
               method: MethodList.DELETE
             }
           ]

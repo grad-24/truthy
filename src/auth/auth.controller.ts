@@ -20,15 +20,9 @@ import { ApiTags } from '@nestjs/swagger';
 import { Request, Response } from 'express';
 import { UAParser } from 'ua-parser-js';
 
-import { GetUser } from 'src/common/decorators/get-user.decorator';
-import JwtTwoFactorGuard from 'src/common/guard/jwt-two-factor.guard';
-import { PermissionGuard } from 'src/common/guard/permission.guard';
-import { multerOptionsHelper } from 'src/common/helper/multer-options.helper';
-import { Pagination } from 'src/paginate';
-import { RefreshToken } from 'src/refresh-token/entities/refresh-token.entity';
 import { AuthService } from 'src/auth/auth.service';
 import { ChangePasswordDto } from 'src/auth/dto/change-password.dto';
-import { CreateUserDto } from 'src/auth/dto/create-user.dto';
+import { CreateAdminDto, CreateCustomerDto, CreateTechnicianDto } from 'src/auth/dto/create-user.dto';
 import { ForgetPasswordDto } from 'src/auth/dto/forget-password.dto';
 import { RegisterUserDto } from 'src/auth/dto/register-user.dto';
 import { ResetPasswordDto } from 'src/auth/dto/reset-password.dto';
@@ -38,13 +32,20 @@ import { UserLoginDto } from 'src/auth/dto/user-login.dto';
 import { UserSearchFilterDto } from 'src/auth/dto/user-search-filter.dto';
 import { UserEntity } from 'src/auth/entity/user.entity';
 import { UserSerializer } from 'src/auth/serializer/user.serializer';
+import { GetUser } from 'src/common/decorators/get-user.decorator';
+import JwtTwoFactorGuard from 'src/common/guard/jwt-two-factor.guard';
+import { PermissionGuard } from 'src/common/guard/permission.guard';
+import { multerOptionsHelper } from 'src/common/helper/multer-options.helper';
+import { Pagination } from 'src/paginate';
 import { RefreshPaginateFilterDto } from 'src/refresh-token/dto/refresh-paginate-filter.dto';
+import { RefreshToken } from 'src/refresh-token/entities/refresh-token.entity';
 import { RefreshTokenSerializer } from 'src/refresh-token/serializer/refresh-token.serializer';
+import { CustomHttpException } from 'src/exception/custom-http.exception';
 
 @ApiTags('user')
 @Controller()
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(private authService: AuthService) { }
 
   @Post('/auth/register')
   register(
@@ -176,13 +177,31 @@ export class AuthController {
     return this.authService.findAll(userSearchFilterDto);
   }
 
+  // @UseGuards(JwtTwoFactorGuard, PermissionGuard)
+  // @Post('/users')
+  // create(
+  //   @Body(ValidationPipe)
+  //   createUserDto: CreateUserDto
+  // ): Promise<UserSerializer> {
+  //   return this.authService.create(createUserDto);
+  // }
+
   @UseGuards(JwtTwoFactorGuard, PermissionGuard)
-  @Post('/users')
-  create(
-    @Body(ValidationPipe)
-    createUserDto: CreateUserDto
-  ): Promise<UserSerializer> {
-    return this.authService.create(createUserDto);
+  @Post('create-admin')
+  createAdmin(@Body() createAdminDto: CreateAdminDto): Promise<UserSerializer> {
+    return this.authService.create(createAdminDto, 1);
+  }
+
+  @UseGuards(JwtTwoFactorGuard, PermissionGuard)
+  @Post('create-customer')
+  createCustomer(@Body() createCustomerDto: CreateCustomerDto): Promise<UserSerializer> {
+    return this.authService.create(createCustomerDto, 2);
+  }
+
+  @UseGuards(JwtTwoFactorGuard, PermissionGuard)
+  @Post('create-technician')
+  createTechnician(@Body() createTechnicianDto: CreateTechnicianDto): Promise<UserSerializer> {
+    return this.authService.create(createTechnicianDto, createTechnicianDto.isTeamLeader ? 4 : 3);
   }
 
   @UseGuards(JwtTwoFactorGuard, PermissionGuard)

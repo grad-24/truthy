@@ -11,7 +11,7 @@
     "prettier:check": "prettier --check ./**/*.{ts,js,json,*rc}",
     "prettier:write": "prettier --write ./**/*.{ts,js,json,*rc}",
     "start": "nest start",
-    "start:dev": "NODE_ENV=development nest start --watch",
+    "start:dev": "set 'NODE_ENV=development' & nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
     "coverage": "jest --coverage",
@@ -24,12 +24,10 @@
     "test:unit": "NODE_ENV=test jest --config ./test/unit/jest-unit.json --runInBand",
     "typeorm": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js --config src/config/ormconfig.ts",
     "orm-create": "npm run typeorm migration:create -- -n",
+    "orm-generate": "npm run typeorm migration:generate -- -n",
     "migrate": "npm run typeorm migration:run",
     "migration:rollback": "npm run typeorm migration:revert",
-    "seed": "ts-node -r tsconfig-paths/register ./node_modules/typeorm-seeding/dist/cli.js seed -n src/config/ormconfig.ts",
-    "precommit": "lint-staged && npm run lint",
-    "prepush": "npm run test:unit && npm run test:e2e",
-    "prepare": "husky install"
+    "seed": "ts-node -r tsconfig-paths/register ./node_modules/typeorm-seeding/dist/cli.js seed -n src/config/ormconfig.ts"
   },
   "dependencies": {
     "@aws-sdk/client-cloudwatch-logs": "^3.54.1",

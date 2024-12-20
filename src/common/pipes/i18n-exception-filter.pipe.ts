@@ -18,7 +18,7 @@ export class I18nExceptionFilterPipe implements ExceptionFilter {
   constructor(
     @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
     private readonly i18n: I18nService
-  ) {}
+  ) { }
 
   async catch(exception: HttpException, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
@@ -34,6 +34,7 @@ export class I18nExceptionFilterPipe implements ExceptionFilter {
   }
 
   async getMessage(exception: HttpException, lang: string) {
+    console.log(exception.message)
     try {
       const exceptionResponse = exception.getResponse() as any;
       if (!exceptionResponse.message && typeof exceptionResponse === 'string') {

@@ -9,23 +9,12 @@ import { MailProcessor } from 'src/mail/mail.processor';
 import { EmailTemplateModule } from 'src/email-template/email-template.module';
 
 const mailConfig = config.get('mail');
-const queueConfig = config.get('queue');
 
 @Module({
   imports: [
     EmailTemplateModule,
-    BullModule.registerQueueAsync({
+    BullModule.registerQueue({
       name: config.get('mail.queueName'),
-      useFactory: () => ({
-        redis: {
-          host: process.env.REDIS_HOST || queueConfig.host,
-          port: process.env.REDIS_PORT || queueConfig.port,
-          password: process.env.REDIS_PASSWORD || queueConfig.password,
-          retryStrategy(times) {
-            return Math.min(times * 50, 2000);
-          }
-        }
-      })
     }),
     MailerModule.forRootAsync({
       useFactory: () => ({
@@ -40,9 +29,8 @@ const queueConfig = config.get('queue');
           }
         },
         defaults: {
-          from: `"${process.env.MAIL_FROM || mailConfig.from}" <${
-            process.env.MAIL_FROM || mailConfig.fromMail
-          }>`
+          from: `"${process.env.MAIL_FROM || mailConfig.from}" <${process.env.MAIL_FROM || mailConfig.fromMail
+            }>`
         },
         preview: mailConfig.preview,
         template: {
@@ -59,4 +47,4 @@ const queueConfig = config.get('queue');
   providers: [MailService, MailProcessor],
   exports: [MailService]
 })
-export class MailModule {}
+export class MailModule { }

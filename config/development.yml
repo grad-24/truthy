@@ -2,9 +2,10 @@ db:
   host: 'localhost'
   type: 'postgres'
   port: 5432
-  username: 'postgres'
-  password: 'root'
+  username: 'msada'
+  password: 'pass123'
   synchronize: false
+  database: 'truthy'
 
 jwt:
   secret: 'example@123'

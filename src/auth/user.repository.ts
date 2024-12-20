@@ -2,7 +2,7 @@ import { DeepPartial, EntityRepository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { classToPlain, plainToClass } from 'class-transformer';
 
-import { UserEntity } from 'src/auth/entity/user.entity';
+import { AdminEntity, CustomerEntity, TechnicianEntity, UserEntity } from 'src/auth/entity/user.entity';
 import { UserLoginDto } from 'src/auth/dto/user-login.dto';
 import { BaseRepository } from 'src/common/repository/base.repository';
 import { UserSerializer } from 'src/auth/serializer/user.serializer';
@@ -10,6 +10,7 @@ import { ResetPasswordDto } from 'src/auth/dto/reset-password.dto';
 import { UserStatusEnum } from 'src/auth/user-status.enum';
 import { ExceptionTitleList } from 'src/common/constants/exception-title-list.constants';
 import { StatusCodesList } from 'src/common/constants/status-codes-list.constants';
+import { CustomHttpException } from 'src/exception/custom-http.exception';
 
 @EntityRepository(UserEntity)
 export class UserRepository extends BaseRepository<UserEntity, UserSerializer> {
@@ -27,9 +28,25 @@ export class UserRepository extends BaseRepository<UserEntity, UserSerializer> {
     }
     createUserDto.salt = await bcrypt.genSalt();
     createUserDto.token = token;
-    const user = this.create(createUserDto);
+
+    const Model = this.getUserInstanceType(createUserDto.roleId);
+    const user = new Model();
+    Object.assign(user, createUserDto);
+
     await user.save();
     return this.transform(user);
+  }
+
+  private getUserInstanceType(roleId: number) {
+    switch (roleId) {
+      case 1: return AdminEntity;
+      case 2: return CustomerEntity;
+      case 3:
+      case 4:
+        return TechnicianEntity;
+
+      default: throw new CustomHttpException('Invalid roleId provided');
+    }
   }
 
   /**

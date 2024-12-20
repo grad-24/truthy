@@ -31,7 +31,7 @@ import { ForgetPasswordDto } from 'src/auth/dto/forget-password.dto';
 import { ResetPasswordDto } from 'src/auth/dto/reset-password.dto';
 import { UserLoginDto } from 'src/auth/dto/user-login.dto';
 import { UserSearchFilterDto } from 'src/auth/dto/user-search-filter.dto';
-import { UserEntity } from 'src/auth/entity/user.entity';
+import { CustomerEntity, TechnicianEntity, UserEntity, UserTypeEnum } from 'src/auth/entity/user.entity';
 import {
   adminUserGroupsForSerializing,
   defaultUserGroupsForSerializing,
@@ -68,7 +68,7 @@ export class AuthService {
     private readonly refreshTokenService: RefreshTokenService,
     @Inject('LOGIN_THROTTLE')
     private readonly rateLimiter: RateLimiterStoreAbstract
-  ) {}
+  ) { }
 
   /**
    * send mail
@@ -105,7 +105,8 @@ export class AuthService {
    * @param createUserDto
    */
   async create(
-    createUserDto: DeepPartial<UserEntity>
+    createUserDto: DeepPartial<UserEntity>,
+    roleId?: number
   ): Promise<UserSerializer> {
     const token = await this.generateUniqueToken(12);
     if (!createUserDto.status) {
@@ -113,11 +114,12 @@ export class AuthService {
       const currentDateTime = new Date();
       currentDateTime.setHours(currentDateTime.getHours() + 1);
       createUserDto.tokenValidityDate = currentDateTime;
-    }
+    } else createUserDto.roleId = roleId;
+
     const registerProcess = !createUserDto.status;
     const user = await this.userRepository.store(createUserDto, token);
     const subject = registerProcess ? 'Account created' : 'Set Password';
-    const link = registerProcess ? `verify/${token}` : `reset/${token}`;
+    const link = registerProcess ? `auth/verify/${token}` : `reset/${token}`;
     const slug = registerProcess ? 'activate-account' : 'new-user-set-password';
     const linkLabel = registerProcess ? 'Activate Account' : 'Set Password';
     await this.sendMailToUser(user, subject, link, slug, linkLabel);
@@ -267,7 +269,8 @@ export class AuthService {
           ...ownerUserGroupsForSerializing,
           ...defaultUserGroupsForSerializing
         ]
-      }
+      },
+      userSearchFilterDto.role ? { roleId: userSearchFilterDto.role } : undefined
     );
   }
 
@@ -465,14 +468,11 @@ export class AuthService {
    */
   getCookieForLogOut(): string[] {
     return [
-      `Authentication=; HttpOnly; Path=/; Max-Age=0; ${
-        !isSameSite ? 'SameSite=None; Secure;' : ''
+      `Authentication=; HttpOnly; Path=/; Max-Age=0; ${!isSameSite ? 'SameSite=None; Secure;' : ''
       }`,
-      `Refresh=; HttpOnly; Path=/; Max-Age=0; ${
-        !isSameSite ? 'SameSite=None; Secure;' : ''
+      `Refresh=; HttpOnly; Path=/; Max-Age=0; ${!isSameSite ? 'SameSite=None; Secure;' : ''
       }`,
-      `ExpiresIn=; Path=/; Max-Age=0; ${
-        !isSameSite ? 'SameSite=None; Secure;' : ''
+      `ExpiresIn=; Path=/; Max-Age=0; ${!isSameSite ? 'SameSite=None; Secure;' : ''
       }`
     ];
   }
@@ -484,19 +484,16 @@ export class AuthService {
    */
   buildResponsePayload(accessToken: string, refreshToken?: string): string[] {
     let tokenCookies = [
-      `Authentication=${accessToken}; HttpOnly; Path=/; ${
-        !isSameSite ? 'SameSite=None; Secure;' : ''
+      `Authentication=${accessToken}; HttpOnly; Path=/; ${!isSameSite ? 'SameSite=None; Secure;' : ''
       } Max-Age=${jwtConfig.cookieExpiresIn}`
     ];
     if (refreshToken) {
       const expiration = new Date();
       expiration.setSeconds(expiration.getSeconds() + jwtConfig.expiresIn);
       tokenCookies = tokenCookies.concat([
-        `Refresh=${refreshToken}; HttpOnly; Path=/; ${
-          !isSameSite ? 'SameSite=None; Secure;' : ''
+        `Refresh=${refreshToken}; HttpOnly; Path=/; ${!isSameSite ? 'SameSite=None; Secure;' : ''
         } Max-Age=${jwtConfig.cookieExpiresIn}`,
-        `ExpiresIn=${expiration}; Path=/; ${
-          !isSameSite ? 'SameSite=None; Secure;' : ''
+        `ExpiresIn=${expiration}; Path=/; ${!isSameSite ? 'SameSite=None; Secure;' : ''
         } Max-Age=${jwtConfig.cookieExpiresIn}`
       ]);
     }
@@ -600,11 +597,16 @@ export class AuthService {
         attachments: [
           {
             filename: '2fa-qrcode.png',
+            // path: This is the path to the file that you want to attach. It can be a file path on the server or a Data URI. Here, qrDataUri is used, which likely contains a Data URI representing the QR code image.
             path: qrDataUri,
+            // cid: The Content-ID (CID) is a unique identifier used to embed the attachment within the email's HTML body. It allows you to reference the image in the email content by its CID. In this case, '2fa-qrcode' is used as the CID.
             cid: '2fa-qrcode'
           }
         ]
       };
+      // To embed the attachment in the email body, you can reference the CID in your email template's HTML like this:
+      // <img src="cid:2fa-qrcode" alt="QR Code">
+
       await this.mailService.sendMail(mailData, 'system-mail');
     }
     return this.userRepository.update(user.id, {
@@ -622,5 +624,36 @@ export class AuthService {
 
   async getRefreshTokenGroupedData(field: string) {
     return this.refreshTokenService.getRefreshTokenGroupedData(field);
+  }
+
+  /**
+ * Get Technicians array by provided array of ids
+ * @param ids
+ */
+  async whereInIds(ids: number[]): Promise<TechnicianEntity[]> {
+    const technicians = await this.userRepository
+      .createQueryBuilder('technician')
+      .whereInIds(ids)
+      .getMany();
+
+    if (technicians.length !== ids.length) {
+      throw new NotFoundException(`One or more technicians with the provided IDs were not found.`);
+    }
+
+    return technicians as TechnicianEntity[];
+  }
+
+  async findCustomerById(id: number): Promise<CustomerEntity> {
+    const customer = await this.userRepository.findOne({
+      where: {
+        id: id,
+        entity: UserTypeEnum.CustomerEntity,
+      },
+    }) as CustomerEntity;
+
+    if (!customer)
+      throw new NotFoundException(`Customer ${id} Not Found`);
+
+    return customer;
   }
 }

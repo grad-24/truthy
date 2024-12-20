@@ -1,26 +1,37 @@
+import * as bcrypt from 'bcrypt';
+import { Exclude } from 'class-transformer';
 import {
   BeforeInsert,
   BeforeUpdate,
+  ChildEntity,
   Column,
   CreateDateColumn,
   Entity,
   Index,
   JoinColumn,
-  OneToOne
+  ManyToOne,
+  OneToMany,
+  TableInheritance
 } from 'typeorm';
-import * as bcrypt from 'bcrypt';
-import { Exclude } from 'class-transformer';
 
 import { UserStatusEnum } from 'src/auth/user-status.enum';
 import { CustomBaseEntity } from 'src/common/entity/custom-base.entity';
+import { OrderEntity } from 'src/orders/entities/order.entity';
 import { RoleEntity } from 'src/role/entities/role.entity';
+import { TechnicianTeamEntity } from 'src/technician-teams/entities/technician-team.entity';
 
+export enum UserTypeEnum {
+  AdminEntity = "AdminEntity",
+  CustomerEntity = "CustomerEntity",
+  TechnicianEntity = "TechnicianEntity"
+}
 /**
  * User Entity
- */
+*/
 @Entity({
   name: 'user'
 })
+@TableInheritance({ column: { type: "enum", enum: UserTypeEnum, name: "entity" } })
 export class UserEntity extends CustomBaseEntity {
   @Index({
     unique: true
@@ -34,7 +45,9 @@ export class UserEntity extends CustomBaseEntity {
   @Column()
   email: string;
 
-  @Column()
+  @Column({
+    nullable: true
+  })
   @Exclude({
     toPlainOnly: true
   })
@@ -44,23 +57,41 @@ export class UserEntity extends CustomBaseEntity {
   @Column()
   name: string;
 
-  @Column()
-  address: string;
+  // @Column()
+  // phoneNumber: string;
 
-  @Column()
-  contact: string;
+  // @Column({
+  //   type: 'enum',
+  //   enum: UserTypeEnum,
+  //   default: UserTypeEnum.CustomerEntity,
+  // })
+  // entity: UserTypeEnum;
 
-  @Column()
-  avatar: string;
+  @Column({
+    nullable: true
+  })
+  address?: string;
+
+  @Column({
+    nullable: true
+  })
+  contact?: string;
+
+  @Column({
+    nullable: true
+  })
+  avatar?: string;
 
   @Column()
   status: UserStatusEnum;
 
-  @Column()
+  @Column({
+    nullable: true
+  })
   @Exclude({
     toPlainOnly: true
   })
-  token: string;
+  token?: string;
 
   @CreateDateColumn({
     type: 'timestamp',
@@ -68,11 +99,13 @@ export class UserEntity extends CustomBaseEntity {
   })
   tokenValidityDate: Date;
 
-  @Column()
+  @Column({
+    nullable: true
+  })
   @Exclude({
     toPlainOnly: true
   })
-  salt: string;
+  salt?: string;
 
   @Column({
     nullable: true
@@ -101,7 +134,7 @@ export class UserEntity extends CustomBaseEntity {
   })
   skipHashPassword = false;
 
-  @OneToOne(() => RoleEntity)
+  @ManyToOne(() => RoleEntity)
   @JoinColumn()
   role: RoleEntity;
 
@@ -130,4 +163,28 @@ export class UserEntity extends CustomBaseEntity {
   async hashPassword() {
     this.password = await bcrypt.hash(this.password, this.salt);
   }
+}
+
+@ChildEntity()
+export class AdminEntity extends UserEntity {
+  // Other admin-specific fields...
+}
+
+@ChildEntity()
+export class CustomerEntity extends UserEntity {
+  @OneToMany(() => OrderEntity, order => order.customer)
+  orders: OrderEntity[];
+
+  // Other customer-specific fields...
+}
+
+@ChildEntity()
+export class TechnicianEntity extends UserEntity {
+  @ManyToOne(() => TechnicianTeamEntity, team => team.technicians)
+  team: TechnicianTeamEntity;
+
+  @Column()
+  teamId: number;
+
+  // Other technician-specific fields...
 }

@@ -30,11 +30,13 @@ export class BaseRepository<
   async get(
     id: number,
     relations: string[] = [],
-    transformOptions = {}
+    transformOptions = {},
+    extraConditions: Record<string, any> = {}
   ): Promise<K | null> {
     return await this.findOne({
       where: {
-        id
+        id,
+        ...extraConditions
       },
       relations
     })
@@ -142,7 +144,6 @@ export class BaseRepository<
       page
     };
   }
-
   /**
    * Paginate data
    * @param searchFilter
@@ -154,38 +155,57 @@ export class BaseRepository<
     searchFilter: DeepPartial<SearchFilterInterface>,
     relations: string[] = [],
     searchCriteria: string[] = [],
-    transformOptions = {}
+    transformOptions = {},
+    extraConditions: Record<string, any> = {} // New parameter for additional conditions
   ): Promise<Pagination<K>> {
     const whereCondition = [];
     const findOptions: FindManyOptions = {};
-    if (searchFilter.hasOwnProperty('keywords') && searchFilter.keywords) {
-      for (const key of searchCriteria) {
-        whereCondition.push({
-          [key]: ILike(`%${searchFilter.keywords}%`)
-        });
-      }
+
+
+    // Adding extra conditions
+    if (Object.keys(extraConditions).length > 0) {
+      whereCondition.push(extraConditions);
     }
+
+    // Adding keyword-based filtering
+    if (searchFilter.hasOwnProperty('keywords') && searchFilter.keywords) {
+      const keywordConditions = searchCriteria.map((key) => ({
+        [key]: ILike(`%${searchFilter.keywords}%`),
+      }));
+      // Merge keyword conditions with AND logic
+      whereCondition.push(...keywordConditions);
+    }
+
+    // Combine all conditions with AND
+    const finalCondition = whereCondition.length
+      ? whereCondition.reduce((acc, condition) => ({ ...acc, ...condition }))
+      : undefined;
+
     const paginationInfo: PaginationInfoInterface =
       this.getPaginationInfo(searchFilter);
+
     findOptions.relations = relations;
     findOptions.take = paginationInfo.limit;
     findOptions.skip = paginationInfo.skip;
-    findOptions.where = whereCondition;
+    findOptions.where = finalCondition; // AND logic applied here
     findOptions.order = {
-      createdAt: 'DESC'
+      createdAt: 'DESC',
     };
+
     const { page, skip, limit } = paginationInfo;
     const [results, total] = await this.findAndCount(findOptions);
     const serializedResult = this.transformMany(results, transformOptions);
+
     return new Pagination<K>({
       results: serializedResult,
       totalItems: total,
       pageSize: limit,
       currentPage: page,
       previous: page > 1 ? page - 1 : 0,
-      next: total > skip + limit ? page + 1 : 0
+      next: total > skip + limit ? page + 1 : 0,
     });
   }
+
 
   /**
    * create new entity

@@ -16,7 +16,7 @@ import { MailJobInterface } from 'src/mail/interface/mail-job.interface';
 export class MailProcessor {
   private readonly logger = new Logger(this.constructor.name);
 
-  constructor(private readonly mailerService: MailerService) {}
+  constructor(private readonly mailerService: MailerService) { }
 
   @OnQueueActive()
   onActive(job: Job) {

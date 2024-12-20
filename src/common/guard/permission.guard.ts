@@ -22,6 +22,9 @@ export class PermissionGuard implements CanActivate {
       path,
       method
     };
+
+    console.log(path, method)
+
     const permitted = this.checkIfDefaultRoute(permissionPayload);
     if (permitted) {
       return true;

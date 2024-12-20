@@ -35,6 +35,7 @@ export class JwtTwoFactorStrategy extends PassportStrategy(
     const user = await this.userRepository.findOne(Number(subject), {
       relations: ['role', 'role.permission']
     });
+
     if (!user.isTwoFAEnabled) {
       return user;
     }
