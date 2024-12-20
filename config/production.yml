@@ -3,14 +3,14 @@ server:
   origin: 'http://localhost:3000'
 
 db:
-  host: ''
-  type: ''
+  host: 'postgresql://postgres:qmlhQDpyoXeouPXEhXeCduDnElWlVhmv@autorack.proxy.rlwy.net:20498/railway'
+  type: 'postgres'
   port: 5432
-  database: 'truthy'
+  database: 'railway'
   synchronize: false
 
 jwt:
-  expiresIn: 900
+  expiresIn: 86400
   refreshExpiresIn: 604800
   cookieExpiresIn: 604800
 
@@ -35,7 +35,7 @@ mail:
 
 queue:
   driver: 'redis'
-  host: 'localhost'
+  host: 'redis://default:MRMhThdoMupZjkZNuNWUvXwCpvRsRzvw@autorack.proxy.rlwy.net:36416'
   port: 6379
   db: ''
   password: ''

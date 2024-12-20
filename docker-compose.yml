@@ -1,11 +1,30 @@
+version: '3.7'
+
 services:
+  main:
+    container_name: main
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
+    ports:
+      - ${SERVER_PORT}:${SERVER_PORT}
+    env_file:
+      - .env
+    networks:
+      - webnet
+    depends_on:
+      - postgres
+
   postgres:
     container_name: postgres
     image: postgres:12
     env_file:
       - .env
-    # networks:
-    #   - null
+    networks:
+      - webnet
     environment:
       POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_USER: ${DB_USERNAME}
@@ -27,16 +46,7 @@ services:
     env_file:
       - .env
     ports:
-      - 6379:6379
-
-  adminer:
-    image: adminer
-    container_name: nestjs-db-connection-adminer
-    restart: always
-    ports:
-      - 8080:8080
-    # networks:
-    #   - null
+      - ${REDIS_PORT}:6379
 
 networks:
   webnet:
