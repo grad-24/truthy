@@ -96,10 +96,6 @@ Lints all the files inside src,apps,libs,test folders and shows the results.
 
 Formats all the files inside src using prettier with config provided in .prettierrc
 
-### `yarn format`
-
-Formats all the files inside src using prettier with config provided in .prettierrc
-
 ### `yarn coverage`
 
 Runs coverage test command and creates coverage folder with detail report which can be checked with:
@@ -273,11 +269,6 @@ User Will have 2FA authentication option available to be turned on or off. For 2
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
 Please make sure to update tests as appropriate. - see `CONTRIBUTING.md` for details.
 **If you want to be featured in contributors list on our home page please add PR on https://github.com/gobeam/truthy-contributors to provide your details.**
-
----
-
-## Sponsors
-- [Ekbana Solutions Pvt. Ltd](https://ekbana.com/)
 
 ---
 
