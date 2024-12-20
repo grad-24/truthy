@@ -13,7 +13,7 @@ import {
   I18nModule,
   QueryResolver
 } from 'nestjs-i18n';
-import { WinstonModule } from 'nest-winston';
+// import { WinstonModule } from 'nest-winston';
 
 import { AuthModule } from 'src/auth/auth.module';
 import { RolesModule } from 'src/role/roles.module';
@@ -32,7 +32,7 @@ import { AppController } from 'src/app.controller';
 import { TechnicianTeamsModule } from './technician-teams/technician-teams.module';
 import { OrdersModule } from './orders/orders.module';
 import { AuditLogModule } from './audit/auditLog.module';
-import winstonConfig from 'src/config/winston';
+// import winstonConfig from 'src/config/winston';
 import { AuditLogMiddleware } from './audit/audit-log.middleware';
 import { BullModule } from '@nestjs/bull';
 import { ServicesModule } from './services/services.module';
@@ -58,7 +58,7 @@ const queueConfig = config.get('queue');
         }
       })
     }),
-    WinstonModule.forRoot(winstonConfig),
+    // WinstonModule.forRoot(winstonConfig),
     ThrottlerModule.forRootAsync({
       useFactory: () => throttleConfig
     }),
