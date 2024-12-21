@@ -22,7 +22,8 @@ app:
   version: 'v0.1'
   description: 'Official Truthy API'
   appUrl: 'http://localhost:7777'
-  frontendUrl: 'http://localhost:8002/'
+  frontendUrl: 'http://localhost:8002/',
+  frontendUrl2: 'http://localhost:3000'
   sameSite: true
 
 mail:

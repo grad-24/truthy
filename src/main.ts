@@ -20,7 +20,7 @@ async function bootstrap() {
   app.use(helmet());
   app.useLogger(app.get(WINSTON_MODULE_NEST_PROVIDER));
   const apiConfig = config.get('app');
-  if (true || process.env.NODE_ENV === 'development') {
+  if (process.env.NODE_ENV === 'development') {
     app.enableCors({
       origin: true,
       methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
@@ -41,7 +41,7 @@ async function bootstrap() {
     const document = SwaggerModule.createDocument(app, swaggerConfig);
     SwaggerModule.setup('api-docs', app, document, customOptions);
   } else {
-    const whitelist = [apiConfig.get<string>('frontendUrl')];
+    const whitelist = [apiConfig.get<string>('frontendUrl'), apiConfig.get<string>('frontendUrl2')];
     app.enableCors({
       origin: function (origin, callback) {
         if (!origin || whitelist.indexOf(origin) !== -1) {
