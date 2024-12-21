@@ -13,7 +13,7 @@
     "start": "nest start",
     "start:dev": "set 'NODE_ENV=development' & nest start --watch",
     "start:debug": "nest start --debug --watch",
-    "start:prod": "node dist/main",
+    "start:prod": "npm run seed && node dist/main",
     "coverage": "jest --coverage",
     "coveralls": "yarn run coverage --coverageReporters=text-lcov | coveralls",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",

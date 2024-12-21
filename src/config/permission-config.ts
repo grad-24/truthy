@@ -432,6 +432,15 @@ export const PermissionConfiguration: PermissionConfigInterface = {
           ]
         },
         {
+          name: 'Mark order as Cancelled',
+          route: [
+            {
+              path: '/orders/:id/status/cancelled',
+              method: MethodList.PATCH
+            }
+          ]
+        },
+        {
           name: 'Delete order by id',
           route: [
             {

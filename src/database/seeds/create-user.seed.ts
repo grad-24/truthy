@@ -25,11 +25,11 @@ export default class CreateUserSeed {
       .values([
         {
           username: 'admin',
-          email: 'admin@truthy.com',
+          email: 'admin@serviceSync.com',
           password:
             '$2b$10$O9BWip02GuE14bDPfBomQebCjwKQyuUfkulhvBB1UoizOeKxGG8Fu', // Truthy@123
           salt: '$2b$10$O9BWip02GuE14bDPfBomQe',
-          name: 'truthy',
+          name: 'mohamed',
           status: UserStatusEnum.ACTIVE,
           roleId: role.id
         }
