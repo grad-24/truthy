@@ -484,17 +484,14 @@ export class AuthService {
    */
   buildResponsePayload(accessToken: string, refreshToken?: string): string[] {
     let tokenCookies = [
-      `Authentication=${accessToken}; HttpOnly; Path=/; ${!isSameSite ? 'SameSite=None; Secure;' : ''
-      } Max-Age=${jwtConfig.cookieExpiresIn}`
+      `Authentication=${accessToken}; HttpOnly; Path=/; SameSite=None; Secure; Max-Age=${jwtConfig.cookieExpiresIn}`
     ];
     if (refreshToken) {
       const expiration = new Date();
       expiration.setSeconds(expiration.getSeconds() + jwtConfig.expiresIn);
       tokenCookies = tokenCookies.concat([
-        `Refresh=${refreshToken}; HttpOnly; Path=/; ${!isSameSite ? 'SameSite=None; Secure;' : ''
-        } Max-Age=${jwtConfig.cookieExpiresIn}`,
-        `ExpiresIn=${expiration}; Path=/; ${!isSameSite ? 'SameSite=None; Secure;' : ''
-        } Max-Age=${jwtConfig.cookieExpiresIn}`
+        `Refresh=${refreshToken}; HttpOnly; Path=/; SameSite=None; Secure; Max-Age=${jwtConfig.cookieExpiresIn}`,
+        `ExpiresIn=${expiration}; Path=/; SameSite=None; Secure; Max-Age=${jwtConfig.cookieExpiresIn}`
       ]);
     }
     return tokenCookies;
