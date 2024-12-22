@@ -43,7 +43,7 @@ async function bootstrap() {
   } else {
     const whitelist = [apiConfig.get<string>('frontendUrl'), apiConfig.get<string>('frontendUrl2')];
     app.enableCors({
-      origin: '*', // This allows all domains
+      origin: true, // Dynamically sets the origin to match the request's origin
       credentials: true
     });
   }
