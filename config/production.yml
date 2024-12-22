@@ -18,7 +18,7 @@ app:
   name: 'Truthy'
   version: 'v0.1'
   description: 'Official Truthy API'
-  appUrl: 'https://truthy-backend.herokuapp.com/'
+  appUrl: 'https://truthy.onrender.com/'
   frontendUrl: 'http://localhost:8002'
   frontendUrl2: 'http://localhost:3000'
 

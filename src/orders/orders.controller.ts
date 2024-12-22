@@ -30,9 +30,7 @@ export class OrdersController {
     @GetUser()
     currentUser: UserEntity
   ): Promise<Pagination<OrderSerializer>> {
-    console.log(filter)
     const o = await this.ordersService.findAll(currentUser, filter);
-    console.log(o.totalItems)
     return o;
   }
 

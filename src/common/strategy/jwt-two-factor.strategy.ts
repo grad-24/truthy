@@ -23,6 +23,7 @@ export class JwtTwoFactorStrategy extends PassportStrategy(
     super({
       jwtFromRequest: ExtractJwt.fromExtractors([
         (request: Request) => {
+          console.log({ token: request?.cookies?.Authentication })
           return request?.cookies?.Authentication;
         }
       ]),
@@ -31,6 +32,7 @@ export class JwtTwoFactorStrategy extends PassportStrategy(
   }
 
   async validate(payload: JwtPayloadDto): Promise<UserEntity> {
+    console.log({ payload })
     const { isTwoFAAuthenticated, subject } = payload;
     const user = await this.userRepository.findOne(Number(subject), {
       relations: ['role', 'role.permission']

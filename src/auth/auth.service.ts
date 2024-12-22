@@ -47,14 +47,17 @@ import { RefreshTokenSerializer } from 'src/refresh-token/serializer/refresh-tok
 const throttleConfig = config.get('throttle.login');
 const jwtConfig = config.get('jwt');
 const appConfig = config.get('app');
-// const isSameSite = process.env.IS_SAME_SITE || appConfig.sameSite;
+const isSameSite = process.env.IS_SAME_SITE || appConfig.sameSite;
 // for heroku
-const isSameSite = true;
+// const isSameSite = false ||
+//   appConfig.sameSite !== null
+//   ? appConfig.sameSite
+//   : process.env.IS_SAME_SITE === 'true';
 const BASE_OPTIONS: SignOptions = {
   issuer: appConfig.appUrl,
   audience: appConfig.frontendUrl
 };
-
+console.log({ isSameSite, appUrl: appConfig.appUrl })
 @Injectable()
 export class AuthService {
   constructor(
