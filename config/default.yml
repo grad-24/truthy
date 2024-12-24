@@ -27,12 +27,12 @@ app:
   sameSite: true
 
 mail:
-  host: 'smtp.mailtrap.io'
+  host: 'sandbox.smtp.mailtrap.io'
   port: 2525
-  user: 'f4a511d60957e6'
-  pass: '7522797b96cef0'
-  from: 'truthycms'
-  fromMail: 'truthycms@gmail.com'
+  user: 'dc52a6f50fb980'
+  pass: 'a935ec47472f2b'
+  from: 'Service-Sync'
+  fromMail: 'service-sync@gmail.com'
   preview: true
   secure: false
   ignoreTLS: true

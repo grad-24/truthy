@@ -57,7 +57,7 @@ const BASE_OPTIONS: SignOptions = {
   issuer: appConfig.appUrl,
   audience: appConfig.frontendUrl
 };
-console.log({ isSameSite, appUrl: appConfig.appUrl })
+
 @Injectable()
 export class AuthService {
   constructor(
@@ -83,16 +83,20 @@ export class AuthService {
     subject: string,
     url: string,
     slug: string,
-    linkLabel: string
+    linkLabel: string,
+    hostname: string
   ) {
     const appConfig = config.get('app');
+
+    const frontendUrl = appConfig.frontendUrl.includes(hostname) ? appConfig.frontendUrl : appConfig.frontendUrl2;
+
     const mailData: MailJobInterface = {
       to: user.email,
       subject,
       slug,
       context: {
         email: user.email,
-        link: `<a href="${appConfig.frontendUrl}/${url}">${linkLabel} →</a>`,
+        link: `<a href="${frontendUrl}/${url}">${linkLabel} →</a>`,
         username: user.username,
         subject
       }
@@ -106,6 +110,7 @@ export class AuthService {
    */
   async create(
     createUserDto: DeepPartial<UserEntity>,
+    hostname: string,
     roleId?: number
   ): Promise<UserSerializer> {
     const token = await this.generateUniqueToken(12);
@@ -122,7 +127,7 @@ export class AuthService {
     const link = registerProcess ? `auth/verify/${token}` : `reset/${token}`;
     const slug = registerProcess ? 'activate-account' : 'new-user-set-password';
     const linkLabel = registerProcess ? 'Activate Account' : 'Set Password';
-    await this.sendMailToUser(user, subject, link, slug, linkLabel);
+    await this.sendMailToUser(user, subject, link, slug, linkLabel, hostname);
     return user;
   }
 
@@ -345,7 +350,7 @@ export class AuthService {
    * forget password and send reset code by email
    * @param forgetPasswordDto
    */
-  async forgotPassword(forgetPasswordDto: ForgetPasswordDto): Promise<void> {
+  async forgotPassword(forgetPasswordDto: ForgetPasswordDto, hostname: string): Promise<void> {
     const { email } = forgetPasswordDto;
     const user = await this.userRepository.findOne({
       where: {
@@ -368,7 +373,8 @@ export class AuthService {
       subject,
       `reset/${token}`,
       'reset-password',
-      subject
+      subject,
+      hostname
     );
   }
 

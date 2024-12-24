@@ -19,13 +19,13 @@ const mailConfig = config.get('mail');
     MailerModule.forRootAsync({
       useFactory: () => ({
         transport: {
-          host: process.env.MAIL_HOST || mailConfig.host,
-          port: process.env.MAIL_PORT || mailConfig.port,
+          host: mailConfig.host,
+          port: mailConfig.port,
           secure: mailConfig.secure,
-          ignoreTLS: mailConfig.ignoreTLS,
+          // ignoreTLS: mailConfig.ignoreTLS,
           auth: {
-            user: process.env.MAIL_USER || mailConfig.user,
-            pass: process.env.MAIL_PASS || mailConfig.pass
+            user: mailConfig.user,
+            pass: mailConfig.pass
           }
         },
         defaults: {

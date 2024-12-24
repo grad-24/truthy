@@ -49,10 +49,11 @@ export class AuthController {
 
   @Post('/auth/register')
   register(
+    @Req() request: Request,
     @Body(ValidationPipe)
     registerUserDto: RegisterUserDto
   ): Promise<UserSerializer> {
-    return this.authService.create(registerUserDto);
+    return this.authService.create(registerUserDto, request.hostname);
   }
 
   @Post('/auth/login')
@@ -111,10 +112,11 @@ export class AuthController {
   @Put('/auth/forgot-password')
   @HttpCode(HttpStatus.NO_CONTENT)
   forgotPassword(
+    @Req() request: Request,
     @Body()
     forgetPasswordDto: ForgetPasswordDto
   ): Promise<void> {
-    return this.authService.forgotPassword(forgetPasswordDto);
+    return this.authService.forgotPassword(forgetPasswordDto, request.hostname);
   }
 
   @Put('/auth/reset-password')
@@ -188,20 +190,26 @@ export class AuthController {
 
   @UseGuards(JwtTwoFactorGuard, PermissionGuard)
   @Post('create-admin')
-  createAdmin(@Body() createAdminDto: CreateAdminDto): Promise<UserSerializer> {
-    return this.authService.create(createAdminDto, 1);
+  createAdmin(
+    @Req() request: Request,
+    @Body() createAdminDto: CreateAdminDto): Promise<UserSerializer> {
+    return this.authService.create(createAdminDto, request.hostname, 1);
   }
 
   @UseGuards(JwtTwoFactorGuard, PermissionGuard)
   @Post('create-customer')
-  createCustomer(@Body() createCustomerDto: CreateCustomerDto): Promise<UserSerializer> {
-    return this.authService.create(createCustomerDto, 2);
+  createCustomer(
+    @Req() request: Request,
+    @Body() createCustomerDto: CreateCustomerDto): Promise<UserSerializer> {
+    return this.authService.create(createCustomerDto, request.hostname, 2);
   }
 
   @UseGuards(JwtTwoFactorGuard, PermissionGuard)
   @Post('create-technician')
-  createTechnician(@Body() createTechnicianDto: CreateTechnicianDto): Promise<UserSerializer> {
-    return this.authService.create(createTechnicianDto, createTechnicianDto.isTeamLeader ? 4 : 3);
+  createTechnician(
+    @Req() request: Request,
+    @Body() createTechnicianDto: CreateTechnicianDto): Promise<UserSerializer> {
+    return this.authService.create(createTechnicianDto, request.hostname, createTechnicianDto.isTeamLeader ? 4 : 3);
   }
 
   @UseGuards(JwtTwoFactorGuard, PermissionGuard)
