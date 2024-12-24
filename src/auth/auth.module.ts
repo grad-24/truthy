@@ -44,7 +44,7 @@ const LoginThrottleFactory = {
       useFactory: () => ({
         secret: process.env.JWT_SECRET || jwtConfig.secret,
         signOptions: {
-          expiresIn: process.env.JWT_EXPIRES_IN || jwtConfig.expiresIn
+          expiresIn: "7d"
         }
       })
     }),
