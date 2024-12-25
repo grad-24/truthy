@@ -19,7 +19,7 @@ app:
   version: 'v0.1'
   description: 'Official Truthy API'
   appUrl: 'https://truthy.onrender.com/'
-  frontendUrl: https://service-sync-frontend.vercel.app
+  frontendUrl: https://service-sync.vercel.app
   frontendUrl2: https://service-sync-cpanel.netlify.app
 
 mail:
